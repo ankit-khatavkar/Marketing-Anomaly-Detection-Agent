@@ -25,3 +25,5 @@ env/
 # OS cruft
 .DS_Store
 Thumbs.db
+
+**/.ipynb_checkpoints/
