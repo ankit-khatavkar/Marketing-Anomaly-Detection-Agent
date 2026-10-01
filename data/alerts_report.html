@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SignalWatch — Anomaly Alerts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f1f3f7;
+    --border: #e3e6ed;
+    --text: #14171f;
+    --text-muted: #666f82;
+    --signal: #0d9488;
+    --signal-soft: rgba(13, 148, 136, 0.08);
+    --high: #dc2626;
+    --high-soft: #fef2f2;
+    --medium: #d97706;
+    --medium-soft: #fffbeb;
+    --low: #4d7c0f;
+    --low-soft: #f7fee7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.75rem 4.5rem; }
+
+  /* ---- Hero ---- */
+  .hero { margin-bottom: 2.75rem; }
+  .brand {
+    display: flex; align-items: center; gap: 0.55rem;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    font-size: 0.95rem; color: var(--signal); margin-bottom: 1.1rem;
+  }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--signal);
+    position: relative; flex-shrink: 0;
+  }
+  .pulse-dot::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 1.5px solid var(--signal); opacity: 0;
+    animation: pulse 2.4s ease-out 0.3s 2;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.4); opacity: 0.9; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .pulse-dot::after { animation: none; } }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+    font-size: 2.1rem; line-height: 1.15; margin: 0 0 0.6rem; letter-spacing: -0.01em;
+  }
+  .hero-sub {
+    color: var(--text-muted); font-size: 1rem; line-height: 1.55;
+    max-width: 52ch; margin: 0 0 2rem;
+  }
+
+  /* ---- Pipeline ---- */
+/* 
+.pipeline {
+    display: flex; align-items: stretch; gap: 0; margin-bottom: 2.25rem;
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  .pipe-step {
+    flex: 1; padding: 0.9rem 0.85rem; background: var(--surface);
+    border-right: 1px solid var(--border); position: relative;
+  }
+  .pipe-step:last-child { border-right: none; }
+  .pipe-num {
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.72rem; font-weight: 600;
+    color: var(--signal); margin-bottom: 0.25rem;
+  }
+  .pipe-label { font-size: 0.83rem; font-weight: 600; color: var(--text); margin-bottom: 0.15rem; }
+  .pipe-desc { font-size: 0.74rem; color: var(--text-muted); line-height: 1.4; }
+*/
+  /* ---- Stats ---- */
+  .stats { display: flex; gap: 0.9rem; margin-bottom: 0; }
+  .stat-card {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.1rem 1.2rem;
+  }
+  .stat-num {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.65rem; font-weight: 700;
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem; }
+  .stat-high .stat-num { color: var(--high); }
+  .stat-medium .stat-num { color: var(--medium); }
+  .stat-low .stat-num { color: var(--low); }
+
+  /* ---- Alert cards ---- */
+  .alerts-heading {
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600;
+    color: var(--text-muted); margin: 2.75rem 0 1rem; letter-spacing: 0.01em;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.3rem 1.4rem; margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.045);
+  }
+  .card-top { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.85rem; flex-wrap: wrap; }
+  .sev-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.78rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 999px;
+  }
+  .sev-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .sev-high { background: var(--high-soft); color: var(--high); }
+  .sev-high .sev-dot { background: var(--high); }
+  .sev-medium { background: var(--medium-soft); color: var(--medium); }
+  .sev-medium .sev-dot { background: var(--medium); }
+  .card-date { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+  .card-kpi {
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; color: var(--text-muted);
+    background: var(--surface-2); padding: 0.15rem 0.55rem; border-radius: 5px;
+  }
+  .card-pct {
+    margin-left: auto; font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.05rem; font-weight: 700;
+  }
+  .card-headline { font-size: 0.95rem; color: var(--text); margin: 0 0 0.9rem; line-height: 1.5; }
+
+  .drivers-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+  .driver-tag {
+    font-size: 0.8rem; background: var(--surface-2); border: 1px solid var(--border);
+    padding: 0.3rem 0.7rem; border-radius: 7px; color: var(--text);
+  }
+  .driver-tag .contrib { color: var(--signal); font-weight: 600; margin-left: 0.35rem; }
+
+  .recommendation {
+    display: flex; gap: 0.55rem; align-items: flex-start;
+    font-size: 0.87rem; color: var(--text-muted); line-height: 1.5;
+    padding-top: 0.9rem; border-top: 1px solid var(--border);
+  }
+  .rec-arrow { color: var(--signal); flex-shrink: 0; margin-top: 0.1rem; }
+
+  .footer {
+    margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+    font-size: 0.82rem; color: var(--text-muted); text-align: center;
+  }
+  .footer strong { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="brand"><span class="pulse-dot"></span>SignalWatch</div>
+    <h1>Marketing anomalies, caught and explained</h1>
+    <p class="hero-sub">Statistical detection flags what's unusual; an LLM only ever narrates numbers it was already given. Four real alerts from GA4's public ecommerce dataset, Nov 23–28 2020.</p>
+
+    <!--<div class="pipeline">
+      <div class="pipe-step"><div class="pipe-num">01</div><div class="pipe-label">Monitor</div><div class="pipe-desc">Daily KPIs pulled from BigQuery</div></div>
+      <div class="pipe-step"><div class="pipe-num">02</div><div class="pipe-label">Detect</div><div class="pipe-desc">Day-of-week baselines, robust z-scores</div></div>
+      <div class="pipe-step"><div class="pipe-num">03</div><div class="pipe-label">Diagnose</div><div class="pipe-desc">Segments ranked by contribution</div></div>
+      <div class="pipe-step"><div class="pipe-num">04</div><div class="pipe-label">Explain</div><div class="pipe-desc">Gemini writes the plain-English alert</div></div>
+    </div> -->
+
+    <div class="stats">
+      <div class="stat-card stat-high"><div class="stat-num">1</div><div class="stat-label">High severity</div></div>
+      <div class="stat-card stat-medium"><div class="stat-num">3</div><div class="stat-label">Medium severity</div></div>
+      <div class="stat-card stat-low"><div class="stat-num">0</div><div class="stat-label">Low severity</div></div>
+    </div>
+  </div>
+
+  <div class="alerts-heading">Flagged anomalies</div>
+
+  <div class="card">
+    <div class="card-top">
+      <span class="sev-pill sev-medium"><span class="sev-dot"></span>Medium</span>
+      <span class="card-date">Nov 23, 2020</span>
+      <span class="card-kpi">revenue</span>
+      <span class="card-pct" style="color:var(--medium);">+77.1%</span>
+    </div>
+    <p class="card-headline">Revenue reached $8,482 against a baseline of $4,789 — a broad-based increase rather than one channel spiking alone.</p>
+    <div class="drivers-row">
+      <span class="driver-tag">mobile / (none)<span class="contrib">+1,351</span></span>
+      <span class="driver-tag">desktop / organic<span class="contrib">+1,032</span></span>
+    </div>
+    <div class="recommendation"><span class="rec-arrow">→</span>Investigate campaign tracking and user activity for mobile / (none) and desktop / organic on Nov 23 to identify the source of the revenue increase.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-top">
+      <span class="sev-pill sev-high"><span class="sev-dot"></span>High</span>
+      <span class="card-date">Nov 24, 2020</span>
+      <span class="card-kpi">avg_order_value</span>
+      <span class="card-pct" style="color:var(--high);">+49.6%</span>
+    </div>
+    <p class="card-headline">Average order value reached $107.76 vs. a baseline of $72.02, concentrated in two mobile segments.</p>
+    <div class="drivers-row">
+      <span class="driver-tag">mobile / (data deleted)<span class="contrib">+8.73</span></span>
+      <span class="driver-tag">mobile / organic<span class="contrib">+7.20</span></span>
+    </div>
+    <div class="recommendation"><span class="rec-arrow">→</span>Audit order and basket size details for mobile / (data deleted) and mobile / organic on Nov 24 to determine what drove the order value increase.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-top">
+      <span class="sev-pill sev-medium"><span class="sev-dot"></span>Medium</span>
+      <span class="card-date">Nov 25, 2020</span>
+      <span class="card-kpi">revenue</span>
+      <span class="card-pct" style="color:var(--medium);">+83.4%</span>
+    </div>
+    <p class="card-headline">Revenue reached $8,121 vs. a baseline of $4,428, again spread across two independent channels.</p>
+    <div class="drivers-row">
+      <span class="driver-tag">mobile / organic<span class="contrib">+1,162</span></span>
+      <span class="driver-tag">desktop / (none)<span class="contrib">+993</span></span>
+    </div>
+    <div class="recommendation"><span class="rec-arrow">→</span>Audit web analytics logs for mobile / organic and desktop / (none) to investigate the root cause of the traffic and revenue surge.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-top">
+      <span class="sev-pill sev-medium"><span class="sev-dot"></span>Medium</span>
+      <span class="card-date">Nov 28, 2020</span>
+      <span class="card-kpi">conversion_rate</span>
+      <span class="card-pct" style="color:var(--medium);">+73.6%</span>
+    </div>
+    <p class="card-headline">Conversion rate reached 2.43% vs. a baseline of 1.40%, led by organic traffic on both device types.</p>
+    <div class="drivers-row">
+      <span class="driver-tag">mobile / organic<span class="contrib">0.0210</span></span>
+      <span class="driver-tag">desktop / organic<span class="contrib">0.0193</span></span>
+    </div>
+    <div class="recommendation"><span class="rec-arrow">→</span>Investigate technical and content updates within mobile / organic and desktop / organic channels to identify what drove the performance spike.</div>
+  </div>
+
+  <div class="footer">Built as a personal portfolio project — <strong>statistics detects, the LLM only explains.</strong></div>
+
+</div>
+</body>
+</html>
